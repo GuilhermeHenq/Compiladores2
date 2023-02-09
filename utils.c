@@ -5,8 +5,8 @@
 
 enum {INT, LOG};
 
-int desempilha();
-void empilha(int valor);
+int desempilha(char);
+void empilha(int, char);
 
 struct elemTabSimbolos {
     char id[100];
@@ -74,27 +74,35 @@ void mostraTabela () {
 }
 
 void testaTipo(int tipo1, int tipo2, int ret){
-    int t1 = desempilha();
-    int t2 = desempilha();
+    int t1 = desempilha('t');
+    int t2 = desempilha('t');
     if(t1 != tipo1 || t2 != tipo2) yyerror("Incompatibilidade de tipo!");
-    empilha(ret);
+    empilha(ret, 't');
 }
 
 // estrutura da pilha semantica
 // usada para enderecos, variaveis, rotulos
 
 #define TAM_PIL 100
-int pilha[TAM_PIL];
+struct {
+    int valor;
+    char tipo; // "r" = rotulo, "n" = nvars, "t" = tipo, "p" = posicaoTabSimb
+}pilha[TAM_PIL];
+
 int topo = -1;
 
-void empilha (int valor) {
+void empilha (int valor, char tipo) {
     if (topo == TAM_PIL)
         yyerror("Pilha semântica cheia");
-    pilha[++topo] = valor;
+    pilha[++topo].valor = valor;
+    pilha[topo].tipo = tipo;
 }
 
-int desempilha() {
+int desempilha(char tipo) {
     if (topo == -1)
         yyerror("Pilha semântica vazia");
-    return pilha[topo--];
+    if(pilha[topo].tipo != tipo)
+        yyerror("Desimpilhamento ERRADO!");
+    return pilha[topo--].valor;
 }
+
