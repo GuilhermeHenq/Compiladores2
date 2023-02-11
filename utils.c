@@ -27,26 +27,7 @@ void maiscula (char *s) {
         s[i] = toupper(s[i]);
 }
 
-void imprimirParametros (int pos)
-    {
-      int qtd = tabSimb[pos].npa;
-      for (int i = 0; i = qtd - 1; i++){
-        printf("%3d -> ", tabSimb[i].tip == INT ? "INT" : "LOG"; )
-      }
-      printf("%3s")  
-    } 
 
-void arrumarParametros (int pos)
-    {
-    int qtd = pos;
-    for(int i = 1; i <= TAM_TAB; i++){
-        if(tabSimb[i].cat == 'f'){  
-           tabSimb[i].npa = pos;
-           tabSimb[i].end = ((-3) - qtd);
-           qtd--;
-        }
-    }
-    }
 
 int buscaSimbolo(char *id)
 {
@@ -146,4 +127,3 @@ void mostrapilha()
     }
     printf("]\n");
 }
-

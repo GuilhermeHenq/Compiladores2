@@ -6,6 +6,7 @@
 #include "utils.c"
 
 int contaVar;
+int contaFunc;
 int numeroPar;
 int rotulo = 0;
 int tipo;
@@ -174,14 +175,14 @@ funcao
     // buscaRot = buscaSimbolo.elemTab id;
     fprintf(yyout,"L%d\t ENSP\n", rotulo);
 
-    posParametro = buscaSimbolo(elemTab.id);
+    /* posParametro = buscaSimbolo(elemTab.id); */
 
 
     }
     T_ABRE parametros T_FECHA 
         // ROTINA PARA AJUSTAR PARAMETROS
        {
-            arrumarParametros(numeroPar);
+           /*  arrumarParametros(numeroPar); */
             escopo = 'L';
        }
     variaveis {
@@ -191,14 +192,8 @@ funcao
     T_INICIO lista_comandos T_FIMFUNC
     { 
 
-         if (retorno == 0){
-            yyerror("A funcao precisa de retorno!")
-        }
 
-        limpaTabela();
-        contaFunc++;
-        posParametro = -1; 
-        escopo = 'G'; 
+        escopo = 'G';  
 
     }
     ;
@@ -411,16 +406,16 @@ chamada
                 if(escopo == 'G'){
                     fprintf(yyout, "\tCRVG\t%d\n", tabSimb[pos].end);
                 }
-                else{
+                /* else{
                     yyerror("ERROR");
-                }
-            else
+                } */
+            else {  
                 if(escopo == 'L'){
                     fprintf(yyout,"\tCRVL\t%d\n", tabSimb[pos].end);
-                } else {
+                } /* else {
                     yyerror("ERROR");
-                }
-             
+                } */
+             }
             empilha(tabSimb[pos].tip, 't');
         }
         }
