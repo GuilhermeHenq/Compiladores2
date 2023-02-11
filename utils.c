@@ -7,6 +7,7 @@ enum {INT, LOG};
 
 int desempilha(char);
 void empilha(int, char);
+void mostrapilha();
 
 struct elemTabSimbolos {
     char id[100];
@@ -25,6 +26,27 @@ void maiscula (char *s) {
     for(int i = 0; s[i]; i++)
         s[i] = toupper(s[i]);
 }
+
+void imprimirParametros (int pos)
+    {
+      int qtd = tabSimb[pos].npa;
+      for (int i = 0; i = qtd - 1; i++){
+        printf("%3d -> ", tabSimb[i].tip == INT ? "INT" : "LOG"; )
+      }
+      printf("%3s")  
+    } 
+
+void arrumarParametros (int pos)
+    {
+    int qtd = pos;
+    for(int i = 1; i <= TAM_TAB; i++){
+        if(tabSimb[i].cat == 'f'){  
+           tabSimb[i].npa = pos;
+           tabSimb[i].end = ((-3) - qtd);
+           qtd--;
+        }
+    }
+    }
 
 int buscaSimbolo(char *id)
 {
@@ -62,14 +84,21 @@ void insereSimbolo (struct elemTabSimbolos elem) {
 // Modificar a rotina mostratabela para apresentar os outros campos
 // (esc, rot, cat, ...) da tabela.
 
+//void imprimirVetor (struct elemTabSimbolos elem)
+//{
+//    for(int i = 0; i < tabSimb[i].npa; i++) 
+//    printf("[%d] -> [%d]")
+//}
+
 void mostraTabela () {
     puts("Tabela de Simbolos");
     puts("------------------");
-    printf("\n%30s | %s | %s \n", "ID", "END", "TIP");
-    for(int i = 0; i < 50; i++) 
+    printf("\n%30s | %s | %s | %s | %s | %s | %s | %s \n", "ID", "END", "TIP", "ESC", "ROT", "CAT", "PAR", "NPAR");
+    for(int i = 0; i < 100; i++) 
         printf(".");
     for(int i = 0; i < posTab; i++)
-        printf("\n%30s | %6d | %s\n", tabSimb[i].id, tabSimb[i].end, tabSimb[i].tip == INT ? "INT" : "LOG");
+        printf("\n%30s | %3d | %s | %2c | %3d | %3c | %3d \n", tabSimb[i].id, tabSimb[i].end, tabSimb[i].tip == INT ? "INT" : "LOG", tabSimb[i].esc
+        , tabSimb[i].rot, tabSimb[i].cat, tabSimb[i].npa);
     printf("\n");
 }
 
@@ -104,5 +133,17 @@ int desempilha(char tipo) {
     if(pilha[topo].tipo != tipo)
         yyerror("Desimpilhamento ERRADO!");
     return pilha[topo--].valor;
+}
+
+void mostrapilha()
+{
+    int i = topo;
+    printf("Pilha = [");
+    while (i >= 0)
+    {
+        printf("(%d, %c)", pilha[i].valor, pilha[i].tipo);
+        i--;
+    }
+    printf("]\n");
 }
 

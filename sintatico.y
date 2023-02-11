@@ -6,14 +6,20 @@
 #include "utils.c"
 
 int contaVar;
+int numeroPar;
 int rotulo = 0;
 int tipo;
-char* escopo;
+char escopo = 'G';
 
+// quantidade de variaveis locais de cada funcao
 int localVar;
-int posParametro;
+// pos que vai se inserir os parametros
+int posParametro = -1;
+// marca se a V é L ou G
 int escAtivo;
-int dslParametro;
+// deslocamento de parametros
+int dslParametro = -3;
+// quantidade de funcoes do programa
 int funcoesQuantidade;
 
 %}
@@ -68,12 +74,11 @@ int funcoesQuantidade;
 
 programa 
     : cabecalho 
-        { contaVar = 0; 
-          escopo = "G";
+        { 
+        contaVar = 0; 
         }
     variaveis 
         { 
-            mostraTabela();
             empilha(contaVar, 'n');
             if (contaVar) 
                 fprintf(yyout,"\tAMEM\t%d\n", contaVar); 
@@ -88,7 +93,8 @@ programa
             if (conta)
                 fprintf(yyout,"\tDMEM\t%d\n", conta); 
             fprintf(yyout,"\tFIMP\n");
-        }
+            mostraTabela();
+        } 
     ;
 
 cabecalho
@@ -119,7 +125,8 @@ lista_variaveis
           strcpy(elemTab.id, atoma);
           elemTab.end = contaVar;
           elemTab.tip = tipo;
-          // elemTab.esc = escopo;
+          elemTab.esc = escopo;
+          elemTab.cat = 'v';
           insereSimbolo(elemTab);
           contaVar++; 
         }
@@ -128,7 +135,8 @@ lista_variaveis
           strcpy(elemTab.id, atoma);
           elemTab.end = contaVar;
           elemTab.tip = tipo;
-          // elemTab.esc = escopo;
+          elemTab.esc = escopo;
+          elemTab.cat = 'v';
           insereSimbolo(elemTab);
           contaVar++;
         }
@@ -137,9 +145,9 @@ lista_variaveis
 rotinas
     : //nao tem fucoes
     |
-        { printf("\tDSVS\tL0\n");}
+        { fprintf(yyout,"\tDSVS\tL0\n");}
     funcoes
-        { printf("L0\tNADA\n"); }
+        { fprintf(yyout,"L0\tNADA\n"); }
     ;
 
 // regras para as funções
@@ -148,12 +156,8 @@ funcoes
     : funcao
     | funcao funcoes
     {
-        // contavar == ...
-
+    //contavar == ...
     // fprintf(yyout...)
-
-
-
     }
     ;
 
@@ -163,18 +167,40 @@ funcao
     strcpy(elemTab.id, atoma);
     elemTab.tip = tipo;
     elemTab.cat = 'f';
-    elemTab.esc = 'L';
+    elemTab.esc = escopo;
+    escopo = 'L';
     elemTab.rot = ++rotulo;
     insereSimbolo(elemTab);
-
     // buscaRot = buscaSimbolo.elemTab id;
+    fprintf(yyout,"L%d\t ENSP\n", rotulo);
 
-    // fprintf(yyout,"L%d\t ENSP\n", rotulo);
+    posParametro = buscaSimbolo(elemTab.id);
+
 
     }
-    T_ABRE parametros T_FECHA // ROTINA PARA AJUSTAR PARAMETROS
-      variaveis T_INICIO lista_comandos T_FIMFUNC
-      { escopo = "G"; }
+    T_ABRE parametros T_FECHA 
+        // ROTINA PARA AJUSTAR PARAMETROS
+       {
+            arrumarParametros(numeroPar);
+            escopo = 'L';
+       }
+    variaveis {
+        // ROTINA AJUSTAR VARIAVEIS LOCAIS RET
+        //fprintf(yyout,"\t AMEM\t%d\n", contaVarLoc);
+    }
+    T_INICIO lista_comandos T_FIMFUNC
+    { 
+
+         if (retorno == 0){
+            yyerror("A funcao precisa de retorno!")
+        }
+
+        limpaTabela();
+        contaFunc++;
+        posParametro = -1; 
+        escopo = 'G'; 
+
+    }
     ;
 
 parametros
@@ -184,6 +210,16 @@ parametros
 
 parametro 
     : tipo T_IDENTIF
+    { 
+
+        strcpy(elemTab.id, atoma);
+        elemTab.tip = tipo;
+        elemTab.esc = 'L';
+        elemTab.cat = 'p';
+        elemTab.rot = 0;
+        insereSimbolo(elemTab);
+        numeroPar++;
+    }
     ;
 
 
@@ -202,6 +238,22 @@ comando
 
 retorno
     : T_RETORNE expressao
+    {
+   /*      if(rotinaAtiva == -1){
+            yyerror("Erro de retorno");
+        }
+    int ret = desempilha();
+    int tipo = tabSimb[rotinaAtiva].tip;
+    if (ret != tipo){
+        yyerror("incompatibilidade de tipo a variavel")
+    }
+    fprintf(yyout,"\tARZL\t%d\n", tabSimb[rotinaAtiva].end);
+    if (contaVarLoc){
+        fprintf(yyout,"\tDMEM\t%d\n", contaVarLoc);
+    }
+    fprintf(yyout,"\tRTSP\t%d\n", tabSimb[rotinaAtiva].end);
+ */
+    }
     // deve gerar (depois da traducao)
     // ARZL (valor de retorno) DMEN (se tiver variavel local)
     // e um RTSP n
@@ -284,8 +336,12 @@ atribuicao
         { 
             int tip = desempilha('t');
             int pos = desempilha('p');
-            if(tabSimb[pos].tip != tip) yyerror("Incompatibilidade de tipo!");
-            fprintf(yyout,"\tARZG\t%d\n", tabSimb[pos].end); 
+            if(tabSimb[pos].tip != tip) 
+                yyerror("Incompatibilidade de tipo!");
+            if(tabSimb[pos].esc == 'G') 
+                fprintf(yyout,"\tARZG\t%d\n", tabSimb[pos].end); 
+            else
+                fprintf(yyout,"\tARZL\t%d\n", tabSimb[pos].end); 
         }
 
 expressao 
@@ -337,12 +393,6 @@ expressao
     | termo 
     ;
 
-//termo : identificador chamada
-//    | T_NUMERO
-//    :
-//    ;
-
-
 identificador
     : T_IDENTIF
      {  
@@ -357,12 +407,22 @@ chamada
     : // sem parametros eh uma variavel
         {
             int pos = desempilha('p');
-            if (tabSimb[pos].esc == 'G')
-                fprintf(yyout, "\tCRVG\t%d\n", tabSimb[pos].end);
+            if (tabSimb[pos].esc == 'G'){   
+                if(escopo == 'G'){
+                    fprintf(yyout, "\tCRVG\t%d\n", tabSimb[pos].end);
+                }
+                else{
+                    yyerror("ERROR");
+                }
             else
-                fprintf(yyout,"\tCRVL\t%d\n", tabSimb[pos].end);
+                if(escopo == 'L'){
+                    fprintf(yyout,"\tCRVL\t%d\n", tabSimb[pos].end);
+                } else {
+                    yyerror("ERROR");
+                }
+             
             empilha(tabSimb[pos].tip, 't');
-
+        }
         }
     | T_ABRE 
             {fprintf(yyout, "\tAMEM\t\n");}

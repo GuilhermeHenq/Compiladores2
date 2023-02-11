@@ -1,4 +1,11 @@
 programa teste5
+func inteiro maior (inteiro a inteiro b)
+inicio
+    se a > b
+        entao retorne a
+        senao retorne b
+    fimse
+fimfunc
 inicio 
-    escreva 3 * 23
+    escreva maior(10 20)
 fimprograma
