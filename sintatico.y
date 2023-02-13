@@ -13,15 +13,13 @@ int tipo;
 char escopo = 'G';
 
 // quantidade de variaveis locais de cada funcao
-int localVar;
+int contaVarLoc;
 // pos que vai se inserir os parametros
 int posParametro = -1;
-// marca se a V é L ou G
-int escAtivo;
 // deslocamento de parametros
-int dslParametro = -3;
+//int dslParametro = -3;
 // quantidade de funcoes do programa
-int funcoesQuantidade;
+//int funcoesQuantidade;
 
 %}
 
@@ -77,6 +75,7 @@ programa
     : cabecalho 
         { 
         contaVar = 0; 
+        escopo = 'G';
         }
     variaveis 
         { 
@@ -174,25 +173,32 @@ funcao
     insereSimbolo(elemTab);
     // buscaRot = buscaSimbolo.elemTab id;
     fprintf(yyout,"L%d\t ENSP\n", rotulo);
+    contaVar++;
 
-    /* posParametro = buscaSimbolo(elemTab.id); */
+    
+    posParametro = buscaSimbolo(elemTab.id);  
 
 
     }
     T_ABRE parametros T_FECHA 
         // ROTINA PARA AJUSTAR PARAMETROS
        {
-           /*  arrumarParametros(numeroPar); */
-            escopo = 'L';
+            updateParams(numeroPar);
        }
     variaveis {
         // ROTINA AJUSTAR VARIAVEIS LOCAIS RET
-        //fprintf(yyout,"\t AMEM\t%d\n", contaVarLoc);
+        //empilha(contaVarLoc, 'n');
+        contaVarLoc++;
+        if(contaVarLoc)
+            fprintf(yyout,"\t AMEM\t%d\n", contaVarLoc);
     }
-    T_INICIO lista_comandos T_FIMFUNC
+    T_INICIO{
+        mostrapilha();
+    }
+    
+     lista_comandos T_FIMFUNC
     { 
-
-
+        posParametro = -1;
         escopo = 'G';  
 
     }
@@ -232,22 +238,20 @@ comando
     ;
 
 retorno
-    : T_RETORNE expressao
+    : T_RETORNE {mostrapilha();} expressao
     {
-   /*      if(rotinaAtiva == -1){
-            yyerror("Erro de retorno");
-        }
-    int ret = desempilha();
-    int tipo = tabSimb[rotinaAtiva].tip;
+    mostrapilha();
+    int ret = desempilha('t');
+    int tipo = tabSimb[posParametro].tip;
     if (ret != tipo){
-        yyerror("incompatibilidade de tipo a variavel")
+        yyerror("incompatibilidade de tipo a variavel");
     }
-    fprintf(yyout,"\tARZL\t%d\n", tabSimb[rotinaAtiva].end);
+    fprintf(yyout,"\tARZL\t%d\n", tabSimb[posParametro].end);
     if (contaVarLoc){
         fprintf(yyout,"\tDMEM\t%d\n", contaVarLoc);
-    }
-    fprintf(yyout,"\tRTSP\t%d\n", tabSimb[rotinaAtiva].end);
- */
+    } 
+    fprintf(yyout,"\tRTSP\t%d\n", tabSimb[posParametro].end);
+    
     }
     // deve gerar (depois da traducao)
     // ARZL (valor de retorno) DMEN (se tiver variavel local)
@@ -401,23 +405,14 @@ identificador
 chamada
     : // sem parametros eh uma variavel
         {
+            mostrapilha();
             int pos = desempilha('p');
             if (tabSimb[pos].esc == 'G'){   
-                if(escopo == 'G'){
-                    fprintf(yyout, "\tCRVG\t%d\n", tabSimb[pos].end);
-                }
-                /* else{
-                    yyerror("ERROR");
-                } */
-            else {  
-                if(escopo == 'L'){
-                    fprintf(yyout,"\tCRVL\t%d\n", tabSimb[pos].end);
-                } /* else {
-                    yyerror("ERROR");
-                } */
-             }
+                fprintf(yyout, "\tCRVG\t%d\n", tabSimb[pos].end);
+            }else {  
+                fprintf(yyout,"\tCRVL\t%d\n", tabSimb[pos].end);
+            }
             empilha(tabSimb[pos].tip, 't');
-        }
         }
     | T_ABRE 
             {fprintf(yyout, "\tAMEM\t\n");}
@@ -433,7 +428,10 @@ chamada
 
 lista_argumentos
     : 
-    | expressao lista_argumentos
+    | expressao {
+        desempilha('t');
+    }
+    lista_argumentos
     ;
 
 

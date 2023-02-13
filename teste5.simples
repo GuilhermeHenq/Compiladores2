@@ -1,10 +1,7 @@
 programa teste5
 func inteiro maior (inteiro a inteiro b)
 inicio
-    se a > b
-        entao retorne a
-        senao retorne b
-    fimse
+    retorne a 
 fimfunc
 inicio 
     escreva maior(10 20)
