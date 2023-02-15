@@ -1,3 +1,12 @@
+/*+=============================================================
+2 | UNIFAL = Universidade Federal de Alfenas .
+3 | BACHARELADO EM CIENCIA DA COMPUTACAO.
+4 | Trabalho . . : Funcao com retorno
+5 | Disciplina : Teoria de Linguagens e Compiladores
+6 | Professor . : Luiz Eduardo da Silva
+7 | Aluno . . . . . : Guilherme Henrique Pereira Serafini
+8 | Data . . . . . . : 17/02/2023
+9 +=============================================================*/
 %{
 #include "lexico.c"
 #include <stdio.h>
@@ -11,14 +20,23 @@ int rotulo = 0;
 int tipo;
 char escopo = 'G';
 
-// quantidade de variaveis locais de cada funcao
-int contaVarLoc;
+// conta a quantidade de argumentos na funcao
+int contaArg = 0;
+
+// salva o numero de parametros antes dele zerar para comparar com os argumentos
+int auxPar;
+
+// quantidade de variaveis locais de cada função
+int contaVarLoc = 0;
 
 // a posicao de endereco da funcao vai ser guardada aqui, inicializa -1 para nao ter erro de comecar com 0 e o endereco ser 0
 int posFuncao = -1;
 
 //quantidade de funcoes do programa
 int funcoesQuantidade;
+
+//apenas para printar de qual funcao é a tabela de simbolos, Pura estética.
+int imprimirFunc = 1;
 
 %}
 
@@ -85,7 +103,7 @@ programa
         }
 
     // acrescentar as funções
-    // rotinas é uma rotina feita pelo Luiz para chamar as funcoes
+    // rotinas é uma rotina feita pelo Luiz para chamar as funções
        rotinas
        T_INICIO lista_comandos T_FIM
         { 
@@ -129,7 +147,7 @@ lista_variaveis
           elemTab.cat = 'v';
           insereSimbolo(elemTab);
           contaVar++;
-          if (elemTab.esc == 'f')
+          if (elemTab.esc == 'L')
             contaVarLoc++;
         }
     | T_IDENTIF
@@ -141,7 +159,7 @@ lista_variaveis
           elemTab.cat = 'v';
           insereSimbolo(elemTab);
           contaVar++;
-          if (elemTab.esc == 'f')
+          if (elemTab.esc == 'L')
             contaVarLoc++;
         }
     ;
@@ -175,8 +193,10 @@ funcao
     escopo = 'L';
     elemTab.rot = ++rotulo;
     insereSimbolo(elemTab);
-    // buscaRot = buscaSimbolo.elemTab id;
+    
+    //printa o comando ENSP para inicio
     fprintf(yyout,"L%d\tENSP\n", rotulo);
+    //quantidade de variaveis globais +1, ja que a funcao é Variavel Global
     contaVar++;
 
     // guarda o endereco da funcao na variavel posFuncao
@@ -195,6 +215,7 @@ funcao
         // ROTINA AJUSTAR VARIAVEIS LOCAIS RET
         //empilha(contaVarLoc, 'n');
         // verifica se há variaveis locais e as armazena gerando um AMEM
+        //printf("\n%d", contaVarLoc);
         if(contaVarLoc)
             fprintf(yyout,"\tAMEM\t%d\n", contaVarLoc);
     }
@@ -206,18 +227,31 @@ funcao
     { 
         /* if(retorno == 0)
             yyerror("A função precisa de retorno"); */
+
+
+        printf("\n--------------------------------------------------------------------------------------------------- ");
+        printf("\n                        TABELA DE SIMBOLO COM VALORES LOCAIS DA FUNCAO %d\n ", imprimirFunc);
+
         // mostra a tabela de simbolos
+
         mostraTabela();
-        //limpa tabela tirando as variaveis locais
+
+        //limpa tabela tirando as variaveis e parametros locais
         limparTabela();
 
         // posFuncao volta ao seu valor original visto que acabou a funcao
         posFuncao = -1;
+
         // escopo volta a ser global
         escopo = 'G';
+
         // soma-se 1 na quantidade de funcoes do programa
         funcoesQuantidade++;  
-        //limpa a quat de parametros para caso haja +1 funcao
+
+        // Soma-se 1 na quantidade do imprimir funca caso haja outra funcao
+        imprimirFunc++;
+        auxPar = numeroPar;
+        //limpa a quantidade de parametros para caso haja +1 funcao
         numeroPar = 0;
     }
     ;
@@ -261,7 +295,7 @@ retorno
     expressao
     {
 
-    // se a posFuncao esta com valor padrao, nao existe endereco de funcao
+    // se a posFuncao esta com valor padrao, nao existe enderecocontaArg de funcao
     // logo nao existe funcao, e o retorno foi chamado na main    
     if(posFuncao == -1){
         yyerror("Retorno chamado na main!");
@@ -284,7 +318,7 @@ retorno
     }
     // deve gerar (depois da traducao)
     // ARZL (valor de retorno) DMEN (se tiver variavel local)
-    // e um RTSP n
+    // e um RTSP npa
     ;
 
 entrada_saida
@@ -319,7 +353,7 @@ repeticao
     expressao T_FACA  
         { 
             int tip = desempilha('t');
-            if(tip != LOG) yyerror("Incompatibilidade de tipo!");
+            if(tip != LOG) yyerror("Incompatibilidade de tipo! 2 ");
             fprintf(yyout,"\tDSVF\tL%d\n", ++rotulo); 
             empilha(rotulo, 'r');
         }
@@ -337,7 +371,7 @@ selecao
     : T_SE expressao T_ENTAO 
         { 
             int tip = desempilha('t');
-            if(tip != LOG) yyerror("Incompatibilidade de tipo!");
+            if(tip != LOG) yyerror("Incompatibilidade de tipo! 3 ");
             fprintf(yyout,"\tDSVF\tL%d\n", ++rotulo);
             empilha(rotulo, 'r'); 
         }
@@ -444,7 +478,7 @@ chamada
             empilha(tabSimb[pos].tip, 't');
         }
     | T_ABRE 
-            {fprintf(yyout, "\tAMEM\t%d\n", funcoesQuantidade);}
+            {fprintf(yyout, "\tAMEM\t1\n");}
     lista_argumentos 
     T_FECHA
     {
@@ -452,16 +486,24 @@ chamada
         fprintf(yyout, "\tSVCP\n");
         fprintf(yyout, "\tDSVS\tL%d\n", tabSimb[pos].rot);
         empilha (tabSimb[pos].tip, 't');
+        if(contaArg != auxPar){
+            yyerror("Erro passado mais argumentos que parametros da função!");
+        }
     }
     ;
 
 lista_argumentos
     : 
-    | expressao {
+    | expressao 
+    {
         int captura = desempilha('t');
-        erroOne(captura, posFuncao);
+        // tabSimb[posFuncao].par[0] == captura;
     }
     lista_argumentos
+    {
+        contaArg++;
+    }
+    
     ;
 
 
@@ -491,7 +533,7 @@ termo
     | T_NAO termo
         {
             int t = desempilha('t');
-            if(t != LOG) yyerror("Incompatibilidade de tipo!");
+            if(t != LOG) yyerror("Incompatibilidade de tipo! 1 ");
             fprintf(yyout,"\tNEGA\n"); 
             empilha(LOG,'t');
         }

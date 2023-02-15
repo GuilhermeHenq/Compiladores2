@@ -4,7 +4,7 @@ func inteiro soma (logico a inteiro b)
 inicio
     retorne b
 fimfunc
-func inteiro mult(inteiro c inteiro d logico j logico k)
+func inteiro mult(inteiro c inteiro d logico j logico k logico z inteiro h)
 inicio
     retorne c * d
 fimfunc

@@ -48,24 +48,23 @@ void limparTabela()
   }
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-char * format_params(struct elemTabSimbolos elem)
+char * format_params(struct elemTabSimbolos simbo)
 {
   char *formatted_params = malloc(150);
-    for (int i = 0; i < elem.npa; i++) {
-      switch (elem.par[i]) {
+    for (int i = 0; i < simbo.npa; i++) {
+      switch (simbo.par[i]) {
         case 0:
-          strcat(formatted_params, " |INT|");
+          strcat(formatted_params, " [INT]");
           break;
         case 1:
-          strcat(formatted_params, " |LOG|");
+          strcat(formatted_params, " [LOG]");
           break;
         default:
           break;
       }
-      if (i < elem.npa - 1) {
-        strcat(formatted_params, " -> ");
+      if (i < simbo.npa - 1) {
+        strcat(formatted_params, " >>>> ");
       }
     }
   return formatted_params;
@@ -128,11 +127,9 @@ int buscaSimbolo(char *id)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void erroOne(int captura, int posFuncao) { 
-        for(int i=0;i <= 100; i++){  
-            if(tabSimb[posFuncao].par[i] != captura){
+            if(tabSimb[posFuncao].par[0] != captura){
               yyerror("erro de blabla");
             }
-        }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void insereSimbolo (struct elemTabSimbolos elem) {
@@ -150,14 +147,15 @@ void insereSimbolo (struct elemTabSimbolos elem) {
     tabSimb[posTab++] = elem; 
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Desenvolver uma rotina para ajustar o endereço dos parametros
 // na tabela de simbolos e o vetor de parametros na função
 // depois que for cadastrado o ultimo parametro
-
 // Modificar a rotina mostratabela para apresentar os outros campos
 // (esc, rot, cat, ...) da tabela.
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //void imprimirVetor (struct elemTabSimbolos elem)
 //{
 //    for(int i = 0; i < tabSimb[i].npa; i++) 
@@ -168,7 +166,7 @@ void mostraTabela () {
     puts("---------------------------------------------------------------------------------------------------");
     puts("                                       Tabela de Simbolos");
     puts("---------------------------------------------------------------------------------------------------");
-    printf("\n%s | %27s | %s | %s | %s | %s | %s | %s | %s \n", "#", "ID", "END", "TIP", "ESC", "ROT", "CAT", "NPAR", "PAR");
+    printf("%s | %27s | %s | %s | %s | %s | %s | %s | %s \n", "#", "ID", "END", "TIP", "ESC", "ROT", "CAT", "NPAR", "PAR");
     for(int i = 0; i < 100; i++) 
         printf(".");
     printf("\n");
@@ -187,9 +185,18 @@ void testaTipo(int tipo1, int tipo2, int ret){
     empilha(ret, 't');
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// void composicaoFunc(int tipo1, int tipo2, int ret){
+//     int t1 = desempilha('t');
+//     int t2 = desempilha('t');
+//     if(t1 != tipo1 || t2 != tipo2) yyerror("Incompatibilidade de tipo!");
+//     empilha(ret, 't');
+// }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // estrutura da pilha semantica
 // usada para enderecos, variaveis, rotulos
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define TAM_PIL 100
 struct {
     int valor;
