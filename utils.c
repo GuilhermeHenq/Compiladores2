@@ -47,7 +47,16 @@ void limparTabela()
       }
   }
 }
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+int atribuirVarLocal(){
+    int atribuir = 0;
+    for (int i = 1; i <= TAM_TAB; i++){
+        if (tabSimb[i].esc == 'L' && tabSimb[i].cat == 'v'){
+            tabSimb[i].end = atribuir;
+            atribuir++;
+        }
+    }
+} 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 char * format_params(struct elemTabSimbolos simbo)
 {
@@ -94,7 +103,7 @@ void arrumarPam(int pos, int npa){
 //     } 
 //   }
 // }
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void updateParams(int count) {
   for (int i = TAM_TAB - 1; i >= 0; i--) {
@@ -126,11 +135,11 @@ int buscaSimbolo(char *id)
     return i;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void erroOne(int captura, int posFuncao) { 
-            if(tabSimb[posFuncao].par[0] != captura){
-              yyerror("erro de blabla");
-            }
-}
+// void erroOne(int captura, int contaArg) { 
+//             if(tabSimb[posFuncao].par[0] != captura){
+//               yyerror("erro de blabla");
+//             }
+// }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void insereSimbolo (struct elemTabSimbolos elem) {
     int i; 
@@ -139,7 +148,7 @@ void insereSimbolo (struct elemTabSimbolos elem) {
         yyerror("Tabela de Simbolos Cheia!");
     for (i = posTab - 1; strcmp(tabSimb[i].id, elem.id) && i >= 0; i--)
         ;
-    if (i != -1) {
+    if (i != -1 && elem.cat != 'p') {
         char msg[200];
         sprintf(msg, "Identificador [%s] duplicado!", elem.id);
         yyerror(msg);
@@ -236,3 +245,28 @@ void mostrapilha()
     printf("]\n");
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// void tratarTiposArgumentos(){
+// int contaArgumentos = 0;  
+// int tipoFunc = 0;
+//   for(int i=TAM_PIL;i >= 0; i--){
+//       if(pilha[i].tipo == 'p'){
+//           tipoFunc = desempilha ('p');
+//           for (int j = i+1; j <= TAM_PIL; j++)
+//           {
+//               if(pilha[j].tipo == 't'){
+//                   contaArgumentos++;
+//                   if(pilha[j].tipo == tabSimb[tipoFunc+1].tip){
+//                       printf("AAAAAAAAAAAAAAA");
+//                       desempilha('t');
+//                   }
+//                   else{
+//                       yyerror("ERRO AQUI MEMO");
+//                   }
+//               }
+//           } 
+          
+//       }
+//       empilha(tipoFunc, 'p');
+      
+//   }
+// }
